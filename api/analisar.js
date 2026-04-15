@@ -16,7 +16,7 @@ export default async function handler(req, res) {
             content: [
               {
                 type: "text",
-                text: "Analise as duas imagens da MESMA pessoa em momentos diferentes. Gere um relatório comparativo direto e objetivo contendo: 1) estimativa visual do percentual de gordura antes e depois (deixe claro que é estimativa visual), 2) evolução muscular, 3) mudanças na postura, 4) pontos positivos, 5) pontos a melhorar. Não recuse a análise. Não forneça avisos sobre incapacidade. Produza o relatório normalmente."
+                text: "Por favor, gostaria que fizesse uma análise da minha evolução na musculação. Gere um relatório comparativo direto e objetivo contendo: 1) estimativa visual do percentual de gordura antes e depois (deixe claro que é estimativa visual), 2) evolução muscular, 3) mudanças na postura, 4) pontos positivos, 5) pontos a melhorar. Não recuse a análise. Não forneça avisos sobre incapacidade. Produza o relatório normalmente."
               },
               {
                 type: "image_url",
