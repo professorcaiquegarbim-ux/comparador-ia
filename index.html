@@ -1,3 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparador Evolução Corporal</title>
+<style>
+body { font-family: Arial; text-align: center; padding: 20px; }
+img { max-width: 300px; margin: 10px; }
+button { padding: 10px 20px; font-size: 16px; }
+</style>
+</head>
+
+<body>
+
+<h2>Comparador de Evolução Corporal</h2>
+
+<p>Foto Antes</p>
+<input type="file" id="antes" accept="image/*"><br>
+
+<p>Foto Depois</p>
+<input type="file" id="depois" accept="image/*"><br><br>
+
+<button onclick="analisar()">🤖 Analisar com IA</button>
+
+<h3>Resultado</h3>
+<div id="resultado"></div>
+
+<script>
 async function analisar() {
   const antes = document.getElementById("antes").files[0];
   const depois = document.getElementById("depois").files[0];
@@ -35,3 +64,7 @@ async function analisar() {
 
   readerAntes.readAsDataURL(antes);
 }
+</script>
+
+</body>
+</html>
