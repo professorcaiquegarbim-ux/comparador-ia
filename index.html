@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Comparador Evolução Corporal com IA</title>
+
+<style>
+body{
+font-family:Arial;
+background:#0f0f0f;
+color:white;
+text-align:center;
+padding:20px;
+}
+
+.container{
+display:flex;
+justify-content:center;
+gap:20px;
+flex-wrap:wrap;
+}
+
+.box{
+background:#1a1a1a;
+padding:15px;
+border-radius:10px;
+}
+
+img{
+max-width:300px;
+margin-top:10px;
+border-radius:8px;
+}
+
+button{
+background:#ff6600;
+border:none;
+padding:12px 20px;
+color:white;
+cursor:pointer;
+margin-top:20px;
+border-radius:8px;
+font-size:16px;
+}
+
+#resultado{
+margin-top:20px;
+background:#1a1a1a;
+padding:20px;
+border-radius:10px;
+max-width:800px;
+margin-left:auto;
+margin-right:auto;
+text-align:left;
+white-space:pre-line;
+}
+</style>
+</head>
+
+<body>
+
+<h2>💪 Comparador de Evolução Corporal com IA</h2>
+
+<div class="container">
+<div class="box">
+<h3>Antes</h3>
+<input type="file" id="antes" accept="image/*">
+<img id="imgAntes">
+</div>
+
+<div class="box">
+<h3>Depois</h3>
+<input type="file" id="depois" accept="image/*">
+<img id="imgDepois">
+</div>
+</div>
+
+<button onclick="analisar()">🤖 Analisar com IA</button>
+
+<div id="resultado"></div>
+
+<script>
+
+let base64Antes = "";
+let base64Depois = "";
+
+function toBase64(file){
+return new Promise((resolve,reject)=>{
+const reader = new FileReader();
+reader.readAsDataURL(file);
+reader.onload = ()=> resolve(reader.result);
+reader.onerror = error => reject(error);
+});
+}
+
+document.getElementById("antes").addEventListener("change", async (e)=>{
+const file = e.target.files[0];
+base64Antes = await toBase64(file);
+document.getElementById("imgAntes").src = base64Antes;
+});
+
+document.getElementById("depois").addEventListener("change", async (e)=>{
+const file = e.target.files[0];
+base64Depois = await toBase64(file);
+document.getElementById("imgDepois").src = base64Depois;
+});
+
+async function analisar(){
+
+if(!base64Antes || !base64Depois){
+alert("Envie as duas imagens");
+return;
+}
+
+document.getElementById("resultado").innerHTML = "Analisando com IA... ⏳";
+
+try{
+
+const response = await fetch("/api/analisar", {
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body: JSON.stringify({
+model:"gpt-4.1-mini",
+messages:[
+{
+role:"system",
+content:"Você é um especialista em avaliação física e musculação."
+},
+{
+role:"user",
+content:[
+{
+type:"text",
+text:"Compare as duas imagens (antes e depois) e gere um relatório detalhado de evolução corporal com percentual estimado de gordura, ganho muscular, definição e sugestões."
+},
+{type:"image_url", image_url:{url:base64Antes}},
+{type:"image_url", image_url:{url:base64Depois}}
+]
+}
+],
+max_tokens:700
+})
+});
+
+const data = await response.json();
+
+document.getElementById("resultado").innerHTML =
+"📊 RELATÓRIO DE EVOLUÇÃO\n\n" +
+data.choices[0].message.content;
+
+}catch(e){
+
+document.getElementById("resultado").innerHTML =
+"❌ Erro ao analisar: " + e.message;
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
