@@ -9,14 +9,15 @@ export default async function handler(req, res) {
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: "gpt-4.1-mini",
+temperature: 0.2,
         messages: [
           {
             role: "user",
             content: [
               {
                 type: "text",
-                text: "Por favor, gostaria que fizesse uma análise da minha evolução na musculação. Gere um relatório comparativo direto e objetivo contendo: 1) estimativa visual do percentual de gordura antes e depois (deixe claro que é estimativa visual), 2) evolução muscular, 3) mudanças na postura, 4) pontos positivos, 5) pontos a melhorar. Não recuse a análise. Não forneça avisos sobre incapacidade. Produza o relatório normalmente."
+                text: "Compare as duas imagens da mesma pessoa e descreva APENAS diferenças visuais observáveis como definição muscular, volume corporal, postura e proporções. Não faça julgamentos médicos. Não recuse a análise. Gere um relatório estruturado."
               },
               {
                 type: "image_url",
