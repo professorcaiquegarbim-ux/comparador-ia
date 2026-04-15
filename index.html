@@ -3,67 +3,161 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Comparador Evolução Corporal</title>
+<title>Comparador de Evolução Corporal</title>
+
 <style>
-body { font-family: Arial; text-align: center; padding: 20px; }
-img { max-width: 300px; margin: 10px; }
-button { padding: 10px 20px; font-size: 16px; }
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  margin: 0;
+  padding: 20px;
+  text-align: center;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+.uploads {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.card {
+  flex: 1;
+  min-width: 250px;
+}
+
+input[type="file"] {
+  margin-top: 10px;
+}
+
+img {
+  max-width: 100%;
+  margin-top: 10px;
+  border-radius: 8px;
+}
+
+button {
+  margin-top: 20px;
+  padding: 12px 25px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  background: #ff6b00;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #e85d00;
+}
+
+#resultado {
+  margin-top: 25px;
+  text-align: left;
+  background: #f9fafb;
+  padding: 15px;
+  border-radius: 8px;
+  white-space: pre-line;
+}
 </style>
+
 </head>
 
 <body>
 
-<h2>Comparador de Evolução Corporal</h2>
+<div class="container">
+<h1>📊 Comparador de Evolução Corporal</h1>
+<p>Envie as fotos "Antes" e "Depois" para gerar o relatório com IA</p>
 
-<p>Foto Antes</p>
-<input type="file" id="antes" accept="image/*"><br>
+<div class="uploads">
+  <div class="card">
+    <h3>Antes</h3>
+    <input type="file" id="antes" accept="image/*">
+    <img id="previewAntes">
+  </div>
 
-<p>Foto Depois</p>
-<input type="file" id="depois" accept="image/*"><br><br>
+  <div class="card">
+    <h3>Depois</h3>
+    <input type="file" id="depois" accept="image/*">
+    <img id="previewDepois">
+  </div>
+</div>
 
 <button onclick="analisar()">🤖 Analisar com IA</button>
 
-<h3>Resultado</h3>
 <div id="resultado"></div>
 
+</div>
+
 <script>
+
+document.getElementById("antes").addEventListener("change", function(e){
+  document.getElementById("previewAntes").src = URL.createObjectURL(e.target.files[0]);
+});
+
+document.getElementById("depois").addEventListener("change", function(e){
+  document.getElementById("previewDepois").src = URL.createObjectURL(e.target.files[0]);
+});
+
 async function analisar() {
-  const antes = document.getElementById("antes").files[0];
-  const depois = document.getElementById("depois").files[0];
+  try {
+    const antes = document.getElementById("antes").files[0];
+    const depois = document.getElementById("depois").files[0];
 
-  if (!antes || !depois) {
-    alert("Envie as duas imagens");
-    return;
-  }
+    if (!antes || !depois) {
+      alert("Envie as duas imagens");
+      return;
+    }
 
-  const readerAntes = new FileReader();
-  const readerDepois = new FileReader();
+    document.getElementById("resultado").innerText = "🤖 Analisando evolução corporal...";
 
-  readerAntes.onload = async function() {
-    readerDepois.onload = async function() {
+    const readerAntes = new FileReader();
+    const readerDepois = new FileReader();
 
-      document.getElementById("resultado").innerText = "Analisando...";
+    readerAntes.onload = function () {
+      readerDepois.onload = async function () {
 
-      const response = await fetch("/api/analisar", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          imagemAntes: readerAntes.result,
-          imagemDepois: readerDepois.result
-        })
-      });
+        const response = await fetch("/api/analisar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            imagemAntes: readerAntes.result,
+            imagemDepois: readerDepois.result
+          })
+        });
 
-      const data = await response.json();
-      document.getElementById("resultado").innerText = data.resultado || data.erro;
+        const data = await response.json();
+
+        document.getElementById("resultado").innerText =
+          data.resultado || data.erro || "Erro ao gerar relatório";
+
+      };
+
+      readerDepois.readAsDataURL(depois);
     };
 
-    readerDepois.readAsDataURL(depois);
-  };
+    readerAntes.readAsDataURL(antes);
 
-  readerAntes.readAsDataURL(antes);
+  } catch (erro) {
+    document.getElementById("resultado").innerText = "Erro: " + erro.message;
+  }
 }
+
 </script>
 
 </body>
