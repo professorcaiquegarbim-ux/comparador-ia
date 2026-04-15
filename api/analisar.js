@@ -1,9 +1,16 @@
 export default async function handler(req, res) {
   try {
-    const { imagemAntes, imagemDepois } = req.body;
+    let body = req.body;
+
+    // Se vier como string (comum no Vercel)
+    if (typeof body === "string") {
+      body = JSON.parse(body);
+    }
+
+    const { imagemAntes, imagemDepois } = body || {};
 
     if (!imagemAntes || !imagemDepois) {
-      return res.status(400).json({ erro: "Imagens não enviadas" });
+      return res.status(400).json({ erro: "Imagens não enviadas corretamente" });
     }
 
     const response = await fetch("https://api.openai.com/v1/responses", {
@@ -17,7 +24,10 @@ export default async function handler(req, res) {
         input: [{
           role: "user",
           content: [
-            { type: "input_text", text: "Compare as duas imagens e gere um relatório detalhado de evolução corporal com estimativa de percentual de gordura." },
+            {
+              type: "input_text",
+              text: "Compare as duas imagens e gere um relatório detalhado de evolução corporal com estimativa de percentual de gordura."
+            },
             { type: "input_image", image_url: imagemAntes },
             { type: "input_image", image_url: imagemDepois }
           ]
@@ -27,15 +37,9 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    console.log("Resposta OpenAI:", JSON.stringify(data));
-
-    let texto = "Não foi possível gerar análise.";
-
-    if (data.output && data.output.length > 0) {
-      if (data.output[0].content && data.output[0].content.length > 0) {
-        texto = data.output[0].content[0].text;
-      }
-    }
+    const texto =
+      data?.output?.[0]?.content?.[0]?.text ||
+      "Não foi possível gerar análise.";
 
     res.status(200).json({ resultado: texto });
 
