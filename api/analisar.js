@@ -6,7 +6,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ erro: "Imagens não enviadas" });
     }
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -14,31 +14,33 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: "Você é um especialista em análise de evolução corporal para musculação."
-          },
+        input: [
           {
             role: "user",
             content: [
-              { type: "text", text: "Compare as duas imagens e gere um relatório detalhado de evolução corporal, incluindo estimativa de percentual de gordura." },
-              { type: "image_url", image_url: { url: imagemAntes } },
-              { type: "image_url", image_url: { url: imagemDepois } }
+              {
+                type: "input_text",
+                text: "Compare as duas imagens e gere um relatório detalhado de evolução corporal para musculação, incluindo estimativa de percentual de gordura."
+              },
+              {
+                type: "input_image",
+                image_url: imagemAntes
+              },
+              {
+                type: "input_image",
+                image_url: imagemDepois
+              }
             ]
           }
-        ],
-        max_tokens: 500
+        ]
       })
     });
 
     const data = await response.json();
 
-    if (!data.choices || !data.choices[0]) {
-      return res.status(500).json({ erro: "Resposta vazia da IA", raw: data });
-    }
-
-    const texto = data.choices[0].message.content;
+    const texto =
+      data?.output?.[0]?.content?.[0]?.text ||
+      "Não foi possível gerar o relatório.";
 
     res.status(200).json({ resultado: texto });
 
